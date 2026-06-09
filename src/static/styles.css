@@ -464,6 +464,17 @@ button {
   transform: translateY(0);
 }
 
+#copy-link-dialog p {
+  margin: 10px 0;
+}
+
+#copy-link-input {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+}
+
 .close-modal,
 .close-login-modal {
   position: absolute;

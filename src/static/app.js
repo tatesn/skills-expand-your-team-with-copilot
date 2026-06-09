@@ -26,7 +26,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const loginMessage = document.getElementById("login-message");
   const schoolName =
     document.querySelector("header h1")?.textContent?.trim() ||
-    "Mergington High School";
+    "our school";
 
   // Activity categories with corresponding colors
   const activityTypes = {
@@ -610,14 +610,21 @@ document.addEventListener("DOMContentLoaded", () => {
         try {
           if (navigator.clipboard && navigator.clipboard.writeText) {
             await navigator.clipboard.writeText(urlToCopy);
+            showMessage(`Share link copied for ${name}.`, "success");
           } else {
-            window.prompt("Copy this activity link:", urlToCopy);
+            showManualCopyDialog(urlToCopy);
+            showMessage(
+              "Automatic copy unavailable. Please copy the link manually.",
+              "info"
+            );
           }
-          showMessage(`Share link copied for ${name}.`, "success");
         } catch (error) {
           console.error("Failed to copy share link:", error);
-          window.prompt("Copy this activity link:", urlToCopy);
-          showMessage("Clipboard unavailable. Use the prompt to copy the link.", "info");
+          showManualCopyDialog(urlToCopy);
+          showMessage(
+            "Unable to copy automatically. Please copy the link manually.",
+            "info"
+          );
         }
       });
     }
@@ -854,6 +861,51 @@ document.addEventListener("DOMContentLoaded", () => {
     setTimeout(() => {
       messageDiv.classList.add("hidden");
     }, 5000);
+  }
+
+  function showManualCopyDialog(url) {
+    let copyDialog = document.getElementById("copy-link-dialog");
+
+    if (!copyDialog) {
+      copyDialog = document.createElement("div");
+      copyDialog.id = "copy-link-dialog";
+      copyDialog.className = "modal hidden";
+      copyDialog.innerHTML = `
+        <div class="modal-content">
+          <h3>Copy Activity Link</h3>
+          <p>Select and copy this link to share it:</p>
+          <input id="copy-link-input" type="text" readonly />
+          <div style="display: flex; justify-content: flex-end; margin-top: 15px;">
+            <button id="close-copy-link-dialog">Close</button>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(copyDialog);
+
+      const closeCopyDialogButton = copyDialog.querySelector(
+        "#close-copy-link-dialog"
+      );
+      closeCopyDialogButton.addEventListener("click", () => {
+        copyDialog.classList.remove("show");
+        setTimeout(() => copyDialog.classList.add("hidden"), 300);
+      });
+
+      copyDialog.addEventListener("click", (event) => {
+        if (event.target === copyDialog) {
+          copyDialog.classList.remove("show");
+          setTimeout(() => copyDialog.classList.add("hidden"), 300);
+        }
+      });
+    }
+
+    const copyInput = copyDialog.querySelector("#copy-link-input");
+    copyInput.value = url;
+    copyDialog.classList.remove("hidden");
+    setTimeout(() => {
+      copyDialog.classList.add("show");
+      copyInput.focus();
+      copyInput.select();
+    }, 10);
   }
 
   // Handle form submission
