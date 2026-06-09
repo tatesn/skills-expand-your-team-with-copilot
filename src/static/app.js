@@ -24,6 +24,9 @@ document.addEventListener("DOMContentLoaded", () => {
   const loginForm = document.getElementById("login-form");
   const closeLoginModal = document.querySelector(".close-login-modal");
   const loginMessage = document.getElementById("login-message");
+  const schoolName =
+    document.querySelector("header h1")?.textContent?.trim() ||
+    "Mergington High School";
 
   // Activity categories with corresponding colors
   const activityTypes = {
@@ -498,11 +501,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Format the schedule using the new helper function
     const formattedSchedule = formatSchedule(details);
-    const shareText = `Join me in checking out "${name}" at Mergington High School!`;
+    const shareText = `Join me in checking out "${name}" at ${schoolName}!`;
     const shareUrl = `${window.location.origin}${window.location.pathname}#activity=${encodeURIComponent(
       name
     )}`;
-    const xShareUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(
+    const xShareUrl = `https://x.com/intent/tweet?text=${encodeURIComponent(
       shareText
     )}&url=${encodeURIComponent(shareUrl)}`;
     const facebookShareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(
@@ -600,26 +603,28 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     const copyShareButton = activityCard.querySelector(".copy-share-button");
-    copyShareButton.addEventListener("click", async () => {
-      const urlToCopy = copyShareButton.dataset.shareUrl;
+    if (copyShareButton) {
+      copyShareButton.addEventListener("click", async () => {
+        const urlToCopy = copyShareButton.dataset.shareUrl;
 
-      try {
-        if (navigator.clipboard && navigator.clipboard.writeText) {
-          await navigator.clipboard.writeText(urlToCopy);
-        } else {
-          const tempInput = document.createElement("input");
-          tempInput.value = urlToCopy;
-          document.body.appendChild(tempInput);
-          tempInput.select();
-          document.execCommand("copy");
-          document.body.removeChild(tempInput);
+        try {
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            await navigator.clipboard.writeText(urlToCopy);
+          } else {
+            const tempInput = document.createElement("input");
+            tempInput.value = urlToCopy;
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            document.execCommand("copy");
+            document.body.removeChild(tempInput);
+          }
+          showMessage(`Share link copied for ${name}.`, "success");
+        } catch (error) {
+          console.error("Failed to copy share link:", error);
+          showMessage("Unable to copy share link. Please try again.", "error");
         }
-        showMessage(`Share link copied for ${name}.`, "success");
-      } catch (error) {
-        console.error("Failed to copy share link:", error);
-        showMessage("Unable to copy share link. Please try again.", "error");
-      }
-    });
+      });
+    }
 
     // Add click handler for register button (only when authenticated)
     if (currentUser) {
