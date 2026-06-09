@@ -46,10 +46,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Authentication state
   let currentUser = null;
+  let currentTheme = "light";
 
   function applyTheme(theme) {
-    const isDarkMode = theme === "dark";
-    document.body.dataset.theme = isDarkMode ? "dark" : "light";
+    const normalizedTheme = theme === "dark" ? "dark" : "light";
+    const isDarkMode = normalizedTheme === "dark";
+    currentTheme = normalizedTheme;
+    document.body.dataset.theme = normalizedTheme;
     themeToggleIcon.textContent = isDarkMode ? "☀️" : "🌙";
     themeToggleLabel.textContent = isDarkMode ? "Light Mode" : "Dark Mode";
     themeToggleButton.setAttribute(
@@ -60,11 +63,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function initializeTheme() {
     const savedTheme = localStorage.getItem("theme");
-    applyTheme(savedTheme === "dark" ? "dark" : "light");
+    applyTheme(savedTheme === "dark" || savedTheme === "light" ? savedTheme : "light");
   }
 
   function toggleTheme() {
-    const nextTheme = document.body.dataset.theme === "dark" ? "light" : "dark";
+    const nextTheme = currentTheme === "dark" ? "light" : "dark";
     localStorage.setItem("theme", nextTheme);
     applyTheme(nextTheme);
   }
