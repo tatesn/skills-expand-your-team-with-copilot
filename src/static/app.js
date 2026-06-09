@@ -498,6 +498,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Format the schedule using the new helper function
     const formattedSchedule = formatSchedule(details);
+    const shareText = `Join me in checking out "${name}" at Mergington High School!`;
+    const shareUrl = `${window.location.origin}${window.location.pathname}#activity=${encodeURIComponent(
+      name
+    )}`;
+    const xShareUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(
+      shareText
+    )}&url=${encodeURIComponent(shareUrl)}`;
+    const facebookShareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(
+      shareUrl
+    )}&quote=${encodeURIComponent(shareText)}`;
 
     // Create activity tag
     const tagHtml = `
@@ -552,6 +562,18 @@ document.addEventListener("DOMContentLoaded", () => {
             .join("")}
         </ul>
       </div>
+      <div class="share-actions">
+        <span class="share-label">Share:</span>
+        <a class="share-button" href="${xShareUrl}" target="_blank" rel="noopener noreferrer">
+          X
+        </a>
+        <a class="share-button" href="${facebookShareUrl}" target="_blank" rel="noopener noreferrer">
+          Facebook
+        </a>
+        <button class="share-button copy-share-button" data-share-url="${shareUrl}">
+          Copy Link
+        </button>
+      </div>
       <div class="activity-card-actions">
         ${
           currentUser
@@ -575,6 +597,28 @@ document.addEventListener("DOMContentLoaded", () => {
     const deleteButtons = activityCard.querySelectorAll(".delete-participant");
     deleteButtons.forEach((button) => {
       button.addEventListener("click", handleUnregister);
+    });
+
+    const copyShareButton = activityCard.querySelector(".copy-share-button");
+    copyShareButton.addEventListener("click", async () => {
+      const urlToCopy = copyShareButton.dataset.shareUrl;
+
+      try {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          await navigator.clipboard.writeText(urlToCopy);
+        } else {
+          const tempInput = document.createElement("input");
+          tempInput.value = urlToCopy;
+          document.body.appendChild(tempInput);
+          tempInput.select();
+          document.execCommand("copy");
+          document.body.removeChild(tempInput);
+        }
+        showMessage(`Share link copied for ${name}.`, "success");
+      } catch (error) {
+        console.error("Failed to copy share link:", error);
+        showMessage("Unable to copy share link. Please try again.", "error");
+      }
     });
 
     // Add click handler for register button (only when authenticated)
