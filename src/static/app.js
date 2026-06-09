@@ -24,10 +24,10 @@ document.addEventListener("DOMContentLoaded", () => {
   const loginForm = document.getElementById("login-form");
   const closeLoginModal = document.querySelector(".close-login-modal");
   const loginMessage = document.getElementById("login-message");
-  const defaultSchoolName = "our school";
+  const fallbackSchoolName = "our school";
   const schoolName =
     document.querySelector("header h1")?.textContent?.trim() ||
-    defaultSchoolName;
+    fallbackSchoolName;
 
   // Activity categories with corresponding colors
   const activityTypes = {
@@ -478,11 +478,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Function to render a single activity card
   function buildShareLinks(activityName) {
-    const safeActivityName = String(activityName || "").trim() || "this activity";
-    const shareText = `Check out "${safeActivityName}" at ${schoolName}.`;
+    const activityNameWithFallback =
+      String(activityName || "").trim() || "this activity";
+    const shareText = `Check out "${activityNameWithFallback}" at ${schoolName}.`;
     const shareUrl = `${window.location.origin}${
       window.location.pathname
-    }#activity=${encodeURIComponent(safeActivityName)}`;
+    }#activity=${encodeURIComponent(activityNameWithFallback)}`;
     const xShareUrl = `https://x.com/intent/tweet?text=${encodeURIComponent(
       shareText
     )}&url=${encodeURIComponent(shareUrl)}`;
@@ -490,7 +491,7 @@ document.addEventListener("DOMContentLoaded", () => {
       shareUrl
     )}`;
 
-    return { safeActivityName, shareUrl, xShareUrl, facebookShareUrl };
+    return { activityNameWithFallback, shareUrl, xShareUrl, facebookShareUrl };
   }
 
   function renderActivityCard(name, details) {
@@ -518,7 +519,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Format the schedule using the new helper function
     const formattedSchedule = formatSchedule(details);
-    const { safeActivityName, shareUrl, xShareUrl, facebookShareUrl } =
+    const { activityNameWithFallback, shareUrl, xShareUrl, facebookShareUrl } =
       buildShareLinks(name);
 
     // Create activity tag
@@ -576,13 +577,13 @@ document.addEventListener("DOMContentLoaded", () => {
       </div>
       <div class="share-actions">
         <span class="share-label">Share:</span>
-        <a class="share-button" href="${xShareUrl}" target="_blank" rel="noopener noreferrer" aria-label="Share ${safeActivityName} on X">
+        <a class="share-button" href="${xShareUrl}" target="_blank" rel="noopener noreferrer" aria-label="Share ${activityNameWithFallback} on X">
           X
         </a>
-        <a class="share-button" href="${facebookShareUrl}" target="_blank" rel="noopener noreferrer" aria-label="Share ${safeActivityName} on Facebook">
+        <a class="share-button" href="${facebookShareUrl}" target="_blank" rel="noopener noreferrer" aria-label="Share ${activityNameWithFallback} on Facebook">
           Facebook
         </a>
-        <button class="share-button copy-share-button" data-share-url="${shareUrl}" aria-label="Copy share link for ${safeActivityName}">
+        <button class="share-button copy-share-button" data-share-url="${shareUrl}" aria-label="Copy share link for ${activityNameWithFallback}">
           Copy Link
         </button>
       </div>
@@ -619,7 +620,10 @@ document.addEventListener("DOMContentLoaded", () => {
         try {
           if (navigator.clipboard && navigator.clipboard.writeText) {
             await navigator.clipboard.writeText(urlToCopy);
-            showMessage(`Share link copied for ${name}.`, "success");
+            showMessage(
+              `Share link copied for ${activityNameWithFallback}.`,
+              "success"
+            );
           } else {
             showManualCopyDialog(urlToCopy);
             showMessage(
