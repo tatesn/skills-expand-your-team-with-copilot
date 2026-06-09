@@ -46,7 +46,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Authentication state
   let currentUser = null;
-  let currentTheme = null;
+  let currentTheme = "light";
 
   function applyTheme(theme) {
     const normalizedTheme = theme === "dark" ? "dark" : "light";
@@ -62,7 +62,8 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function initializeTheme() {
-    applyTheme(localStorage.getItem("theme"));
+    const savedTheme = localStorage.getItem("theme");
+    applyTheme(savedTheme ?? "light");
   }
 
   function toggleTheme() {
