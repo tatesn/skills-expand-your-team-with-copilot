@@ -501,7 +501,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Format the schedule using the new helper function
     const formattedSchedule = formatSchedule(details);
-    const shareText = `Join me in checking out "${name}" at ${schoolName}!`;
+    const shareText = `Check out "${name}" at ${schoolName}.`;
     const shareUrl = `${window.location.origin}${window.location.pathname}#activity=${encodeURIComponent(
       name
     )}`;
@@ -510,7 +510,7 @@ document.addEventListener("DOMContentLoaded", () => {
     )}&url=${encodeURIComponent(shareUrl)}`;
     const facebookShareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(
       shareUrl
-    )}&quote=${encodeURIComponent(shareText)}`;
+    )}`;
 
     // Create activity tag
     const tagHtml = `
@@ -611,17 +611,13 @@ document.addEventListener("DOMContentLoaded", () => {
           if (navigator.clipboard && navigator.clipboard.writeText) {
             await navigator.clipboard.writeText(urlToCopy);
           } else {
-            const tempInput = document.createElement("input");
-            tempInput.value = urlToCopy;
-            document.body.appendChild(tempInput);
-            tempInput.select();
-            document.execCommand("copy");
-            document.body.removeChild(tempInput);
+            window.prompt("Copy this activity link:", urlToCopy);
           }
           showMessage(`Share link copied for ${name}.`, "success");
         } catch (error) {
           console.error("Failed to copy share link:", error);
-          showMessage("Unable to copy share link. Please try again.", "error");
+          window.prompt("Copy this activity link:", urlToCopy);
+          showMessage("Clipboard unavailable. Use the prompt to copy the link.", "info");
         }
       });
     }
