@@ -25,6 +25,10 @@ document.addEventListener("DOMContentLoaded", () => {
   const loginForm = document.getElementById("login-form");
   const closeLoginModal = document.querySelector(".close-login-modal");
   const loginMessage = document.getElementById("login-message");
+  const fallbackSchoolName = "our school";
+  const schoolName =
+    document.querySelector("header h1")?.textContent?.trim() ||
+    fallbackSchoolName;
 
   // Activity categories with corresponding colors
   const activityTypes = {
@@ -496,6 +500,23 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // Function to render a single activity card
+  function buildShareLinks(activityName) {
+    const activityNameWithFallback =
+      String(activityName || "").trim() || "this activity";
+    const shareText = `Check out "${activityNameWithFallback}" at ${schoolName}.`;
+    const shareUrl = `${window.location.origin}${
+      window.location.pathname
+    }#activity=${encodeURIComponent(activityNameWithFallback)}`;
+    const xShareUrl = `https://x.com/intent/tweet?text=${encodeURIComponent(
+      shareText
+    )}&url=${encodeURIComponent(shareUrl)}`;
+    const facebookShareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(
+      shareUrl
+    )}`;
+
+    return { activityNameWithFallback, shareUrl, xShareUrl, facebookShareUrl };
+  }
+
   function renderActivityCard(name, details) {
     const activityCard = document.createElement("div");
     activityCard.className = "activity-card";
@@ -521,6 +542,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Format the schedule using the new helper function
     const formattedSchedule = formatSchedule(details);
+    const { activityNameWithFallback, shareUrl, xShareUrl, facebookShareUrl } =
+      buildShareLinks(name);
     const formattedDifficulty = details.difficulty
       ? details.difficulty.charAt(0).toUpperCase() + details.difficulty.slice(1)
       : "";
@@ -583,6 +606,18 @@ document.addEventListener("DOMContentLoaded", () => {
             .join("")}
         </ul>
       </div>
+      <div class="share-actions">
+        <span class="share-label">Share:</span>
+        <a class="share-button" href="${xShareUrl}" target="_blank" rel="noopener noreferrer" aria-label="Share ${activityNameWithFallback} on X">
+          X
+        </a>
+        <a class="share-button" href="${facebookShareUrl}" target="_blank" rel="noopener noreferrer" aria-label="Share ${activityNameWithFallback} on Facebook">
+          Facebook
+        </a>
+        <button class="share-button copy-share-button" data-share-url="${shareUrl}" aria-label="Copy share link for ${activityNameWithFallback}">
+          Copy Link
+        </button>
+      </div>
       <div class="activity-card-actions">
         ${
           currentUser
@@ -607,6 +642,36 @@ document.addEventListener("DOMContentLoaded", () => {
     deleteButtons.forEach((button) => {
       button.addEventListener("click", handleUnregister);
     });
+
+    const copyShareButton = activityCard.querySelector(".copy-share-button");
+    if (copyShareButton) {
+      copyShareButton.addEventListener("click", async () => {
+        const urlToCopy = copyShareButton.dataset.shareUrl;
+
+        try {
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            await navigator.clipboard.writeText(urlToCopy);
+            showMessage(
+              `Share link copied for ${activityNameWithFallback}.`,
+              "success"
+            );
+          } else {
+            showManualCopyDialog(urlToCopy);
+            showMessage(
+              "Automatic copy unavailable. Please copy the link manually.",
+              "info"
+            );
+          }
+        } catch (error) {
+          console.error("Failed to copy share link:", error);
+          showManualCopyDialog(urlToCopy);
+          showMessage(
+            "Unable to copy automatically. Please copy the link manually.",
+            "info"
+          );
+        }
+      });
+    }
 
     // Add click handler for register button (only when authenticated)
     if (currentUser) {
@@ -853,6 +918,51 @@ document.addEventListener("DOMContentLoaded", () => {
     setTimeout(() => {
       messageDiv.classList.add("hidden");
     }, 5000);
+  }
+
+  function showManualCopyDialog(url) {
+    let copyDialog = document.getElementById("copy-link-dialog");
+
+    if (!copyDialog) {
+      copyDialog = document.createElement("div");
+      copyDialog.id = "copy-link-dialog";
+      copyDialog.className = "modal hidden";
+      copyDialog.innerHTML = `
+        <div class="modal-content">
+          <h3>Copy Activity Link</h3>
+          <p>Select and copy this link to share it:</p>
+          <input id="copy-link-input" type="text" readonly />
+          <div style="display: flex; justify-content: flex-end; margin-top: 15px;">
+            <button id="close-copy-link-dialog">Close</button>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(copyDialog);
+
+      const closeCopyDialogButton = copyDialog.querySelector(
+        "#close-copy-link-dialog"
+      );
+      closeCopyDialogButton.addEventListener("click", () => {
+        copyDialog.classList.remove("show");
+        setTimeout(() => copyDialog.classList.add("hidden"), 300);
+      });
+
+      copyDialog.addEventListener("click", (event) => {
+        if (event.target === copyDialog) {
+          copyDialog.classList.remove("show");
+          setTimeout(() => copyDialog.classList.add("hidden"), 300);
+        }
+      });
+    }
+
+    const copyInput = copyDialog.querySelector("#copy-link-input");
+    copyInput.value = url;
+    copyDialog.classList.remove("hidden");
+    setTimeout(() => {
+      copyDialog.classList.add("show");
+      copyInput.focus();
+      copyInput.select();
+    }, 10);
   }
 
   // Handle form submission
