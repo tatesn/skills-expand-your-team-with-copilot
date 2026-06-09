@@ -24,9 +24,10 @@ document.addEventListener("DOMContentLoaded", () => {
   const loginForm = document.getElementById("login-form");
   const closeLoginModal = document.querySelector(".close-login-modal");
   const loginMessage = document.getElementById("login-message");
+  const defaultSchoolName = "our school";
   const schoolName =
     document.querySelector("header h1")?.textContent?.trim() ||
-    "our school";
+    defaultSchoolName;
 
   // Activity categories with corresponding colors
   const activityTypes = {
@@ -476,6 +477,22 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // Function to render a single activity card
+  function buildShareLinks(activityName) {
+    const safeActivityName = String(activityName || "").trim() || "this activity";
+    const shareText = `Check out "${safeActivityName}" at ${schoolName}.`;
+    const shareUrl = `${window.location.origin}${
+      window.location.pathname
+    }#activity=${encodeURIComponent(safeActivityName)}`;
+    const xShareUrl = `https://x.com/intent/tweet?text=${encodeURIComponent(
+      shareText
+    )}&url=${encodeURIComponent(shareUrl)}`;
+    const facebookShareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(
+      shareUrl
+    )}`;
+
+    return { safeActivityName, shareUrl, xShareUrl, facebookShareUrl };
+  }
+
   function renderActivityCard(name, details) {
     const activityCard = document.createElement("div");
     activityCard.className = "activity-card";
@@ -501,16 +518,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Format the schedule using the new helper function
     const formattedSchedule = formatSchedule(details);
-    const shareText = `Check out "${name}" at ${schoolName}.`;
-    const shareUrl = `${window.location.origin}${window.location.pathname}#activity=${encodeURIComponent(
-      name
-    )}`;
-    const xShareUrl = `https://x.com/intent/tweet?text=${encodeURIComponent(
-      shareText
-    )}&url=${encodeURIComponent(shareUrl)}`;
-    const facebookShareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(
-      shareUrl
-    )}`;
+    const { safeActivityName, shareUrl, xShareUrl, facebookShareUrl } =
+      buildShareLinks(name);
 
     // Create activity tag
     const tagHtml = `
@@ -567,13 +576,13 @@ document.addEventListener("DOMContentLoaded", () => {
       </div>
       <div class="share-actions">
         <span class="share-label">Share:</span>
-        <a class="share-button" href="${xShareUrl}" target="_blank" rel="noopener noreferrer">
+        <a class="share-button" href="${xShareUrl}" target="_blank" rel="noopener noreferrer" aria-label="Share ${safeActivityName} on X">
           X
         </a>
-        <a class="share-button" href="${facebookShareUrl}" target="_blank" rel="noopener noreferrer">
+        <a class="share-button" href="${facebookShareUrl}" target="_blank" rel="noopener noreferrer" aria-label="Share ${safeActivityName} on Facebook">
           Facebook
         </a>
-        <button class="share-button copy-share-button" data-share-url="${shareUrl}">
+        <button class="share-button copy-share-button" data-share-url="${shareUrl}" aria-label="Copy share link for ${safeActivityName}">
           Copy Link
         </button>
       </div>
